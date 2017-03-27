@@ -1,0 +1,39 @@
+﻿  stdafx.cpp
+  Shapes.cpp
+  Scene.cpp
+  RayTracerDemo.cpp
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(3): warning C4603: 'GLFW_INCLUDE_GLU': macro is not defined or definition is different after precompiled header use
+  e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(3): note: Add macro to precompiled header instead of defining here
+  e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(5): note: use of precompiled header
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(4): warning C4603: 'GLFW_DLL': macro is not defined or definition is different after precompiled header use
+  e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(4): note: Add macro to precompiled header instead of defining here
+  e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(5): note: use of precompiled header
+c:\program files (x86)\windows kits\8.1\include\shared\minwindef.h(130): warning C4005: 'APIENTRY': macro redefinition
+  c:\program files (x86)\microsoft visual studio 14.0\vc\include\glfw\glfw3.h(98): note: see previous definition of 'APIENTRY'
+c:\libraries\opencv\build\include\opencv2\core\mat.hpp(2586): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\libraries\opencv\build\include\opencv2\core\persistence.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\libraries\opencv\build\include\opencv2\core\utility.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\libraries\opencv\build\include\opencv2\core\utility.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+c:\libraries\opencv\build\include\opencv2\imgproc.hpp(592): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(74): warning C4101: 'i': unreferenced local variable
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(75): warning C4101: 'angle': unreferenced local variable
+  Camera.cpp
+  Generating Code...
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+RayTracerDemo.obj : error LNK2019: unresolved external symbol __imp_glBegin referenced in function "void __cdecl drawcall(void)" (?drawcall@@YAXXZ)
+RayTracerDemo.obj : error LNK2019: unresolved external symbol __imp_glClear referenced in function "void __cdecl drawcall(void)" (?drawcall@@YAXXZ)
+RayTracerDemo.obj : error LNK2019: unresolved external symbol __imp_glClearColor referenced in function "void __cdecl initScene(void)" (?initScene@@YAXXZ)
+RayTracerDemo.obj : error LNK2019: unresolved external symbol __imp_glClearDepth referenced in function "void __cdecl initScene(void)" (?initScene@@YAXXZ)
+RayTracerDemo.obj : error LNK2019: unresolved external symbol __imp_glColor3fv referenced in function "void __cdecl drawcall(void)" (?drawcall@@YAXXZ)
+RayTracerDemo.obj : error LNK2019: unresolved external symbol __imp_glDepthFunc referenced in function "void __cdecl initScene(void)" (?initScene@@YAXXZ)
+RayTracerDemo.obj : error LNK2019: unresolved external symbol __imp_glEnable referenced in function "void __cdecl initScene(void)" (?initScene@@YAXXZ)
+RayTracerDemo.obj : error LNK2019: unresolved external symbol __imp_glEnd referenced in function "void __cdecl drawcall(void)" (?drawcall@@YAXXZ)
+RayTracerDemo.obj : error LNK2019: unresolved external symbol __imp_glFlush referenced in function "void __cdecl drawcall(void)" (?drawcall@@YAXXZ)
+RayTracerDemo.obj : error LNK2019: unresolved external symbol __imp_glHint referenced in function "void __cdecl initScene(void)" (?initScene@@YAXXZ)
+RayTracerDemo.obj : error LNK2019: unresolved external symbol __imp_glLoadIdentity referenced in function "void __cdecl drawcall(void)" (?drawcall@@YAXXZ)
+RayTracerDemo.obj : error LNK2019: unresolved external symbol __imp_glMatrixMode referenced in function "void __cdecl window_size_callback(struct GLFWwindow *,int,int)" (?window_size_callback@@YAXPEAUGLFWwindow@@HH@Z)
+RayTracerDemo.obj : error LNK2019: unresolved external symbol __imp_glShadeModel referenced in function "void __cdecl initScene(void)" (?initScene@@YAXXZ)
+RayTracerDemo.obj : error LNK2019: unresolved external symbol __imp_glVertex2fv referenced in function "void __cdecl drawcall(void)" (?drawcall@@YAXXZ)
+RayTracerDemo.obj : error LNK2019: unresolved external symbol __imp_glViewport referenced in function "void __cdecl window_size_callback(struct GLFWwindow *,int,int)" (?window_size_callback@@YAXPEAUGLFWwindow@@HH@Z)
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\lib\amd64\GLU32.lib : warning LNK4272: library machine type 'X86' conflicts with target machine type 'x64'
+E:\MyProjects\VisualStuido\RayTracerDemo\x64\Debug\RayTracerDemo.exe : fatal error LNK1120: 15 unresolved externals
