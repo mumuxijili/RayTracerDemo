@@ -1,21 +1,23 @@
 // RayTracerDemo.cpp : Defines the entry point for the console application.
 // http://blog.csdn.net/silangquan/article/details/8176855
-#define GLFW_INCLUDE_GLU
+//#define GLFW_INCLUDE_GLU
 #define GLFW_DLL
 #include "stdafx.h"
+#include <GL/glew.h>
+#include "Shader.h"
 #include <GLFW/glfw3.h>
-//#include <GL/glew.h>
 #include <iostream>
 #include <cmath>
 #include "Shapes.h"
 #include "Camera.h"
 #include "Scene.h"
-#include "Shader.h"
 #include <windows.h>
 #include <vector>
 #include <string>
 #include <opencv2/opencv.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #define WINDOW_WIDTH 600
 #define WINDOW_HEIGHT 600
@@ -325,6 +327,136 @@ void renderASceneRecursive()
 	glfwSwapBuffers(window);
 }
 
+void renderModernGL(GLuint& programID, glm::mat4& mvp, GLuint& MatrixID)
+{
+	Sphere* sphere1 = new Sphere(glm::vec3(0, 10, -10), 10);
+	Sphere* sphere2 = new Sphere(glm::vec3(15, 5, -10), 5);
+	Plane* plane1 = new Plane(glm::vec3(0, 1, 0), glm::vec3(0, 0, 0));
+	plane1->attr = new ChessMat(0.1f, 0.5f);
+	sphere1->attr = new PhongMat(Color::red(), Color::white(), 32.0f, 0.25f);
+	sphere2->attr = new PhongMat(Color::blue(), Color::white(), 8.0f, 0.25f);
+	Scene scene;
+	scene.push(sphere1);
+	scene.push(sphere2);
+	scene.push(plane1);
+	Camera camera(glm::vec3(0, 15, 10), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0), 60.0f);
+
+	GLuint VertexArrayID;
+	glGenVertexArrays(1, &VertexArrayID);
+	glBindVertexArray(VertexArrayID);
+
+	//Plan A: use vector
+	vector<glm::vec3> vertices;
+	vector<glm::vec3> colors;
+	GLuint indices[WINDOW_WIDTH * WINDOW_HEIGHT];
+	//*******************
+	long maxDepth = 18;
+	long maxReflect = 5;
+	double dx = 1.0f / WINDOW_WIDTH;
+	double dy = 1.0f / WINDOW_HEIGHT;
+	double dd = 255.0f / maxDepth;
+	image.clear();
+	image.resize(WINDOW_HEIGHT, std::vector<cv::Vec3b>(WINDOW_WIDTH));
+	for (long y = 0; y < WINDOW_HEIGHT; y++)
+	{
+		double sy = 1 - dy * y;
+		for (long x = 0; x < WINDOW_WIDTH; x++)
+		{
+			double sx = dx * x;
+			Ray ray = Ray(camera.getRay(sx, sy));
+			CollideInfo info = scene.collideScene(ray);
+			vertices.push_back(glm::vec3(sx, sy, 0));
+			indices[y * WINDOW_HEIGHT + x] = y * WINDOW_HEIGHT + x;
+			if (info.isHit)
+			{
+				Color color = rayTracer(&scene, ray, maxReflect);
+				colors.push_back(glm::vec3(color.r, color.g, color.b));
+				image[y][x] = cv::Vec3b(color.b * 255, color.g * 255, color.r * 255);
+			}
+			else
+			{
+				colors.push_back(glm::vec3(0, 0, 0));
+				image[y][x] = cv::Vec3b(0, 0, 0);
+			}
+		}
+	}
+	// Plan B: use arrays
+	/*GLfloat g_vertex_buffer_data[WINDOW_WIDTH * WINDOW_HEIGHT * 3];
+
+	GLfloat g_color_buffer_data[WINDOW_WIDTH * WINDOW_HEIGHT * 3];
+
+	GLuint indices[WINDOW_WIDTH * WINDOW_HEIGHT];
+
+	double dx = 1.0f / WINDOW_WIDTH;
+	double dy = 1.0f / WINDOW_HEIGHT;
+	image.clear();
+	image.resize(WINDOW_HEIGHT, std::vector<cv::Vec3b>(WINDOW_WIDTH));
+	for (long y = 0; y < WINDOW_HEIGHT; y++)
+	{
+		// sample x, sample y£¨È¡Ñù×ø±ê£©
+		double sy = 1 - dy * y;
+		for (long x = 0; x < WINDOW_WIDTH; x++)
+		{
+			double sx = dx * x;
+			float colorR = x * 1.0 / WINDOW_WIDTH * 255.0;
+			float colorB = y * 1.0 / WINDOW_HEIGHT * 255.0;
+			g_vertex_buffer_data[y * WINDOW_HEIGHT * 3 + x * 3] = sx;
+			g_vertex_buffer_data[y * WINDOW_HEIGHT * 3 + x * 3 + 1] = sy;
+			g_vertex_buffer_data[y * WINDOW_HEIGHT * 3 + x * 3 + 2] = 0;
+
+			g_color_buffer_data[y * WINDOW_HEIGHT * 3 + x * 3] = colorR / 255.0f;
+			g_color_buffer_data[y * WINDOW_HEIGHT * 3 + x * 3 + 1] = 0.0f;
+			g_color_buffer_data[y * WINDOW_HEIGHT * 3 + x * 3 + 2] = colorB / 255.0f;
+
+			indices[y * WINDOW_HEIGHT + x] = y * WINDOW_HEIGHT + x;
+			image[y][x] = cv::Vec3b(colorB, 0.0f, colorR);
+		}
+	}*/
+
+	//********************
+	GLuint vertexBuffer;
+	glGenBuffers(1, &vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+
+	GLuint colorBuffers;
+	glGenBuffers(1, &colorBuffers);
+	glBindBuffer(GL_ARRAY_BUFFER, colorBuffers);
+	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), &colors[0], GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
+
+	GLuint elementBuffer;
+	glGenBuffers(1, &elementBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	glUseProgram(programID);
+	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
+	
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, colorBuffers);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+	glDrawElements(GL_POINTS, WINDOW_HEIGHT * WINDOW_WIDTH, GL_UNSIGNED_INT, (void*)0);
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+
+	// Cleanup VBO
+	glDeleteBuffers(1, &vertexBuffer);
+	glDeleteVertexArrays(1, &VertexArrayID);
+	glDeleteProgram(programID);
+
+	glFlush();
+	glfwSwapBuffers(window);
+}
+
 void saveimage(string filename)
 {
 	int h = (int)image.size();
@@ -368,10 +500,9 @@ int main()
 	}
 
 	//glfwWindowHint(GLFW_SAMPLES, 4);
-	//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Ray Tracer Demo", NULL, NULL);
 	if (window == NULL)
@@ -382,14 +513,14 @@ int main()
 		return -1;
 	}
 
-	initScene();
+	//initScene();
 	glfwMakeContextCurrent(window);
 
 	glfwSetWindowSizeCallback(window, window_size_callback);
 	glfwSetKeyCallback(window, key_callback);
 
 	// init glew(Shader program starts from here)
-	/*glewExperimental = true;
+	glewExperimental = true;
 	if (glewInit() != GLEW_OK)
 	{
 		fprintf(stderr, "Failed to initialize GLEW\n");
@@ -399,44 +530,40 @@ int main()
 	}
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-	glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glShadeModel(GL_SMOOTH);
 	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
-	GLuint VertexArrayID;
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
-
 	GLuint programID = LoadShaders("Shaders/SimpleVertexShader.vert", "Shaders/SimpleFragmentShader.frag");
 
-	vector<glm::vec3> vertices;
-	vector<glm::vec3> colors;
+	// MVP
+	GLuint MatrixID = glGetUniformLocation(programID, "mvp");
 
-	GLuint vertexBuffer;
-	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-	GLuint colorBuffers;
-	glGenBuffers(1, &colorBuffers);
-	glBindBuffer(GL_ARRAY_BUFFER, colorBuffers);
-	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), &colors[0], GL_STATIC_DRAW);*/
+	//glm::mat4 Projection = glm::perspective(glm::radians(60.0f), (float)WINDOW_WIDTH / WINDOW_HEIGHT, 0.01f, 100.0f);
+	glm::mat4 Projection = glm::mat4(1.0f);
+	//glm::mat4 View = glm::lookAt(glm::vec3(0, 10, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	glm::mat4 View = glm::mat4(1.0f);
+	glm::mat4 Model = glm::mat4(1.0f);
+	Model = glm::translate(Model, glm::vec3(-0.5f, -0.5f, 0.0f));
+	glm::mat4 mvp = Projection * View * Model;
 
 	do
 	{
 		_update_fps_counter(window);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		drawcall();
+		//drawcall();
 		//renderASphere();
 		//renderAPlane();
 		//renderAScene();
 		//renderASceneRecursive();
+		renderModernGL(programID, mvp, MatrixID);
 		glfwPollEvents();
 		//system("pause");
 	}while( glfwWindowShouldClose(window) == 0 );
 
-	//saveimage("10.bmp");
+	//saveimage("11.bmp");
 	//system("pause");
 	glfwTerminate();
     return 0;
