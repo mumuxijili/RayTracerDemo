@@ -2,6 +2,7 @@
 #define __ATTRIBUTE_H__
 
 #include "Shapes.h"
+//#include "PointLight.h"
 
 class Color
 {
@@ -13,6 +14,7 @@ public:
 	Color add(const Color& c);
 	Color multiply(float s) const;
 	Color modulate(const Color& c) const;
+	Color divide(float d) const;
 	void saturate();
 	static inline Color black() { return Color(0, 0, 0); }
 	static inline Color white() { return Color(1, 1, 1); }
@@ -52,7 +54,7 @@ private:
 
 
 //temporary global settings
-static glm::vec3 lightDir = glm::normalize(glm::vec3(1, 1, 1)); // parallel light
+static glm::vec3 lightDir = glm::normalize(glm::vec3(0, 1.5, 1)/*(1, 1, 1)*/); // parallel light
 static Color lightColor = Color::white();
 
 //Blinn-Phong Material
@@ -60,6 +62,7 @@ class PhongMat : public Attribute
 {
 public:
 	PhongMat();
+	PhongMat(const Color& _diffuse, const Color& _specular, float _shininess, bool _usePointLight, glm::vec3 _pointLightPos, Color _pointLightColor, float _reflectiveness = 0.0f);
 	PhongMat(const Color& _diffuse, const Color& _specular, float _shininess, float _reflectiveness = 0.0f);
 	Color sample(Ray& ray, glm::vec3& position, glm::vec3& normal);
 	~PhongMat();
@@ -67,6 +70,9 @@ private:
 	Color diffuse;
 	Color specular;
 	float shininess;
+	bool usePointLight = false;
+	glm::vec3 pointLightPos;
+	Color pointLightColor;
 };
 
 

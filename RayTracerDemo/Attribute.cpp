@@ -36,6 +36,17 @@ Color Color::modulate(const Color& c) const
 	return t;
 }
 
+Color Color::divide(float d) const
+{
+	Color t;
+	if (d != 0.0f)
+		t = Color(r / d, g / d, b / d);
+	else
+		t = Color(r, g, b);
+	t.saturate();
+	return t;
+}
+
 void Color::saturate()
 {
 	r = r > 1.0f ? 1.0f : r;
@@ -118,6 +129,7 @@ PhongMat::~PhongMat()
 	//
 }
 
+// don't use point light
 PhongMat::PhongMat(const Color& _diffuse, const Color& _specular, float _shininess, float _reflectiveness /* = 0.0f */)
 {
 	diffuse = _diffuse;
@@ -126,8 +138,24 @@ PhongMat::PhongMat(const Color& _diffuse, const Color& _specular, float _shinine
 	reflectiveness = _reflectiveness;
 }
 
+PhongMat::PhongMat(const Color& _diffuse, const Color& _specular, float _shininess, bool _usePointLight, glm::vec3 _pointLightPos, Color _pointLightColor, float _reflectiveness /* = 0.0f */)
+{
+	diffuse = _diffuse;
+	specular = _specular;
+	shininess = _shininess;
+	reflectiveness = _reflectiveness;
+	usePointLight = _usePointLight;
+	pointLightPos = _pointLightPos;
+	pointLightColor = _pointLightColor;
+}
+
 Color PhongMat::sample(Ray& ray, glm::vec3& position, glm::vec3& normal)
 {
+	if (usePointLight)
+	{
+		lightDir = glm::normalize(pointLightPos - position);
+		lightColor = pointLightColor;
+	}
 	float NdotL = glm::dot(normal, lightDir);
 	glm::vec3 H = glm::normalize(lightDir - ray.getDirection());
 	float NdotH = glm::dot(normal, H);

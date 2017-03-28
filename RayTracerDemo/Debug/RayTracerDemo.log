@@ -4,25 +4,29 @@ e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(4): war
   e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(5): note: use of precompiled header
 c:\program files (x86)\windows kits\8.1\include\shared\minwindef.h(130): warning C4005: 'APIENTRY': macro redefinition
   c:\program files (x86)\microsoft visual studio 14.0\vc\include\glfw\glfw3.h(98): note: see previous definition of 'APIENTRY'
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(86): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(87): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(89): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(90): warning C4244: 'argument': conversion from 'float' to 'uchar', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(126): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(131): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(134): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(173): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(178): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(181): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(228): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(233): warning C4244: 'argument': conversion from 'float' to 'GLubyte', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(234): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(235): warning C4244: 'argument': conversion from 'float' to 'uchar', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(303): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(308): warning C4244: 'argument': conversion from 'float' to 'GLubyte', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(309): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(310): warning C4244: 'argument': conversion from 'float' to 'uchar', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(366): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(374): warning C4244: 'argument': conversion from 'float' to 'uchar', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(88): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(89): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(91): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(92): warning C4244: 'argument': conversion from 'float' to 'uchar', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(128): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(133): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(136): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(175): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(180): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(183): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(230): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(235): warning C4244: 'argument': conversion from 'float' to 'GLubyte', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(236): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(237): warning C4244: 'argument': conversion from 'float' to 'uchar', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(305): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(310): warning C4244: 'argument': conversion from 'float' to 'GLubyte', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(311): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(312): warning C4244: 'argument': conversion from 'float' to 'uchar', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(380): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(388): warning C4244: 'argument': conversion from 'float' to 'uchar', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(477): warning C4305: 'argument': truncation from 'double' to 'float'
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(527): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(539): warning C4305: 'argument': truncation from 'double' to 'float'
+e:\myprojects\visualstuido\raytracerdemo\raytracerdemo\raytracerdemo.cpp(547): warning C4244: 'argument': conversion from 'float' to 'uchar', possible loss of data
   RayTracerDemo.vcxproj -> E:\MyProjects\VisualStuido\RayTracerDemo\Debug\RayTracerDemo.exe
   RayTracerDemo.vcxproj -> E:\MyProjects\VisualStuido\RayTracerDemo\Debug\RayTracerDemo.pdb (Full PDB)

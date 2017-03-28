@@ -11,6 +11,8 @@
 #include "Shapes.h"
 #include "Camera.h"
 #include "Scene.h"
+#include "DirectLight.h"
+#include "PointLight.h"
 #include <windows.h>
 #include <vector>
 #include <string>
@@ -329,16 +331,28 @@ void renderASceneRecursive()
 
 void renderModernGL(GLuint& programID, glm::mat4& mvp, GLuint& MatrixID)
 {
-	Sphere* sphere1 = new Sphere(glm::vec3(0, 10, -10), 10);
-	Sphere* sphere2 = new Sphere(glm::vec3(15, 5, -10), 5);
-	Plane* plane1 = new Plane(glm::vec3(0, 1, 0), glm::vec3(0, 0, 0));
-	plane1->attr = new ChessMat(0.1f, 0.5f);
+	Sphere* sphere1 = new Sphere(glm::vec3(-2, 10, -10), 10);
+	Sphere* sphere2 = new Sphere(glm::vec3(8, 4, -2), 4);
+	Plane* groundPlane = new Plane(glm::vec3(0, 1, 0), glm::vec3(0, 0, 0));
+	Plane* backPlane = new Plane(glm::vec3(0, 0, 1), glm::vec3(0, 0, -10));
+	Plane* topPlane = new Plane(glm::vec3(0, -1, 0), glm::vec3(0, 40, 0));
+	Plane* leftPlane = new Plane(glm::vec3(1, 0, 0.5f), glm::vec3(-20, 0, 0));
+	Plane* rightPlane = new Plane(glm::vec3(-1, 0, 0.5f), glm::vec3(20, 0, 0));
+	groundPlane->attr = new ChessMat(0.1f, 0.5f);
+	topPlane->attr = new PhongMat(Color::white(), Color::white(), 16.0f);
+	backPlane->attr = new PhongMat(Color::white(), Color::white(), 16.0f);
+	leftPlane->attr = new PhongMat(Color::green(), Color::white(), 16.0f);
+	rightPlane->attr = new PhongMat(Color::red(), Color::white(), 16.0f);
 	sphere1->attr = new PhongMat(Color::red(), Color::white(), 32.0f, 0.25f);
 	sphere2->attr = new PhongMat(Color::blue(), Color::white(), 8.0f, 0.25f);
 	Scene scene;
 	scene.push(sphere1);
 	scene.push(sphere2);
-	scene.push(plane1);
+	scene.push(groundPlane);
+	scene.push(topPlane);
+	scene.push(backPlane);
+	scene.push(leftPlane);
+	scene.push(rightPlane);
 	Camera camera(glm::vec3(0, 15, 10), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0), 60.0f);
 
 	GLuint VertexArrayID;
@@ -457,6 +471,133 @@ void renderModernGL(GLuint& programID, glm::mat4& mvp, GLuint& MatrixID)
 	glfwSwapBuffers(window);
 }
 
+void renderLight(GLuint& programID, glm::mat4& mvp, GLuint& MatrixID)
+{
+	DirectLight directLight = DirectLight(Color::white(), glm::vec3(0, -1.5, -1), true);
+	PointLight pointLight = PointLight(glm::vec3(5, 30, 10), Color::white().multiply(0.8), true);
+
+	//Sphere* sphere1 = new Sphere(glm::vec3(0, 10, -10), 10);
+	//Sphere* sphere2 = new Sphere(glm::vec3(15, 5, -10), 5);
+	Sphere* sphere1 = new Sphere(glm::vec3(-2, 10, -8), 10);
+	Sphere* sphere2 = new Sphere(glm::vec3(10, 4, -2), 4);
+	Plane* groundPlane = new Plane(glm::vec3(0, 1, 0), glm::vec3(0, 0, 0));
+	Plane* backPlane = new Plane(glm::vec3(0, 0, 1), glm::vec3(0, 0, -10));
+	Plane* topPlane = new Plane(glm::vec3(0, -1, 0), glm::vec3(0, 40, 0));
+	Plane* leftPlane = new Plane(glm::vec3(1, 0, 0), glm::vec3(-20, 0, 0));
+	Plane* rightPlane = new Plane(glm::vec3(-1, 0, 0), glm::vec3(20, 0, 0));
+	groundPlane->attr = new ChessMat(0.1f, 0.5f);
+	topPlane->attr = new PhongMat(Color::white(), Color::white(), 16.0f, true, pointLight.getPoint(), pointLight.getColor());
+	backPlane->attr = new PhongMat(Color::white(), Color::white(), 16.0f, true, pointLight.getPoint(), pointLight.getColor());
+	leftPlane->attr = new PhongMat(Color::green(), Color::white(), 16.0f, true, pointLight.getPoint(), pointLight.getColor());
+	rightPlane->attr = new PhongMat(Color::red(), Color::white(), 16.0f, true, pointLight.getPoint(), pointLight.getColor());
+	sphere1->attr = new PhongMat(Color::red(), Color::white(), 32.0f, true, pointLight.getPoint(), pointLight.getColor(), 0.25f);
+	sphere2->attr = new PhongMat(Color::blue(), Color::white(), 8.0f, true, pointLight.getPoint(), pointLight.getColor(), 0.25f);
+	Scene scene;
+	scene.push(sphere1);
+	scene.push(sphere2);
+	scene.push(groundPlane);
+	scene.push(topPlane);
+	scene.push(backPlane);
+	scene.push(leftPlane);
+	scene.push(rightPlane);
+	Camera camera(glm::vec3(0, 15, 10), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0), 60.0f);
+
+	GLuint VertexArrayID;
+	glGenVertexArrays(1, &VertexArrayID);
+	glBindVertexArray(VertexArrayID);
+
+	//Plan A: use vector
+	vector<glm::vec3> vertices;
+	vector<glm::vec3> colors;
+	GLuint indices[WINDOW_WIDTH * WINDOW_HEIGHT];
+	//*******************
+	long maxDepth = 18;
+	long maxReflect = 5;
+	double dx = 1.0f / WINDOW_WIDTH;
+	double dy = 1.0f / WINDOW_HEIGHT;
+	double dd = 255.0f / maxDepth;
+	image.clear();
+	image.resize(WINDOW_HEIGHT, std::vector<cv::Vec3b>(WINDOW_WIDTH));
+	for (long y = 0; y < WINDOW_HEIGHT; y++)
+	{
+		double sy = 1 - dy * y;
+		for (long x = 0; x < WINDOW_WIDTH; x++)
+		{
+			double sx = dx * x;
+			Ray ray = Ray(camera.getRay(sx, sy));
+			CollideInfo info = scene.collideScene(ray);
+			vertices.push_back(glm::vec3(sx, sy, 0));
+			indices[y * WINDOW_HEIGHT + x] = y * WINDOW_HEIGHT + x;
+			if (info.isHit)
+			{
+				//Color color = directLight.intersectLight(scene, info);
+				//Color color = pointLight.intersectLight(scene, info);
+				Color color;
+				if (pointLight.isIntersected(scene, info))
+				{
+					//color = Color::black().multiply(0.5f);
+					color = Color::black().add(Color(0.1, 0.1, 0.1)).modulate(rayTracer(&scene, ray, maxReflect));
+					//cout << color.r << endl;
+				}
+				else
+				{
+					color = rayTracer(&scene, ray, maxReflect);
+				}
+				colors.push_back(glm::vec3(color.r, color.g, color.b));
+				image[y][x] = cv::Vec3b(color.b * 255, color.g * 255, color.r * 255);
+			}
+			else
+			{
+				colors.push_back(glm::vec3(0, 0, 0));
+				image[y][x] = cv::Vec3b(0, 0, 0);
+			}
+		}
+	}
+
+	//********************
+	GLuint vertexBuffer;
+	glGenBuffers(1, &vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+
+	GLuint colorBuffers;
+	glGenBuffers(1, &colorBuffers);
+	glBindBuffer(GL_ARRAY_BUFFER, colorBuffers);
+	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), &colors[0], GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
+
+	GLuint elementBuffer;
+	glGenBuffers(1, &elementBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	glUseProgram(programID);
+	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
+
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, colorBuffers);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+	glDrawElements(GL_POINTS, WINDOW_HEIGHT * WINDOW_WIDTH, GL_UNSIGNED_INT, (void*)0);
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+
+	// Cleanup VBO
+	glDeleteBuffers(1, &vertexBuffer);
+	glDeleteVertexArrays(1, &VertexArrayID);
+	glDeleteProgram(programID);
+
+	glFlush();
+	glfwSwapBuffers(window);
+}
+
 void saveimage(string filename)
 {
 	int h = (int)image.size();
@@ -513,7 +654,7 @@ int main()
 		return -1;
 	}
 
-	//initScene();
+	initScene();
 	glfwMakeContextCurrent(window);
 
 	glfwSetWindowSizeCallback(window, window_size_callback);
@@ -528,13 +669,6 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
-
-	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glShadeModel(GL_SMOOTH);
-	glClearDepth(1.0f);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
 
 	GLuint programID = LoadShaders("Shaders/SimpleVertexShader.vert", "Shaders/SimpleFragmentShader.frag");
 
@@ -558,12 +692,13 @@ int main()
 		//renderAPlane();
 		//renderAScene();
 		//renderASceneRecursive();
-		renderModernGL(programID, mvp, MatrixID);
+		//renderModernGL(programID, mvp, MatrixID);
+		renderLight(programID, mvp, MatrixID);
 		glfwPollEvents();
 		//system("pause");
 	}while( glfwWindowShouldClose(window) == 0 );
 
-	//saveimage("11.bmp");
+	//saveimage("16.bmp");
 	//system("pause");
 	glfwTerminate();
     return 0;
