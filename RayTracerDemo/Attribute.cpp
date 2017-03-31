@@ -149,12 +149,54 @@ PhongMat::PhongMat(const Color& _diffuse, const Color& _specular, float _shinine
 	pointLightColor = _pointLightColor;
 }
 
+PhongMat::PhongMat(const Color& _diffuse, const Color& _specular, float _shininess, bool _useFaceLight, glm::vec3 _faceLightPos, Color _faceLightColor, glm::vec3 _dx, glm::vec3 _dy, float _reflectiveness /* = 0.0f */)
+{
+	diffuse = _diffuse;
+	specular = _specular;
+	shininess = _shininess;
+	reflectiveness = _reflectiveness;
+	useFaceLight = _useFaceLight;
+	faceLightPos = _faceLightPos;
+	dx = _dx;
+	dy = _dy;
+	faceLightColor = _faceLightColor;
+}
+
+glm::vec3 PhongMat::randPoint()
+{
+	std::default_random_engine e(std::random_device{}());
+	std::uniform_real_distribution<float> distribution(0.0, 1.0);
+	float randx = distribution(e);
+	float randy = distribution(e);
+	return glm::vec3(faceLightPos + randx * dx + randy * dy);
+}
+
 Color PhongMat::sample(Ray& ray, glm::vec3& position, glm::vec3& normal)
 {
 	if (usePointLight)
 	{
 		lightDir = glm::normalize(pointLightPos - position);
 		lightColor = pointLightColor;
+	}
+	if (useFaceLight)
+	{
+		lightColor = faceLightColor;
+		glm::vec3 tmpColor = glm::vec3(0);
+		for (int i = 0; i < SHADOW_SAMPLE; i++)
+		{
+			lightDir = glm::normalize(randPoint() - position);
+			float NdotL = glm::dot(normal, lightDir);
+			glm::vec3 H = glm::normalize(lightDir - ray.getDirection());
+			float NdotH = glm::dot(normal, H);
+			Color diffuseTerm = diffuse.multiply(std::max<float>(NdotL, 0.0f));
+			Color specularTerm = specular.multiply(std::powf(std::max<float>(NdotH, 0.0f), shininess));
+			Color tmp = lightColor.modulate(diffuseTerm.add(specularTerm));
+			tmpColor[0] = tmpColor[0] + tmp.r;
+			tmpColor[1] = tmpColor[1] + tmp.g;
+			tmpColor[2] = tmpColor[2] + tmp.b;
+		}
+		tmpColor = tmpColor / (float)SHADOW_SAMPLE;
+		return Color(tmpColor[0], tmpColor[1], tmpColor[2]);
 	}
 	float NdotL = glm::dot(normal, lightDir);
 	glm::vec3 H = glm::normalize(lightDir - ray.getDirection());

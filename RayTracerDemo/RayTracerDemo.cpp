@@ -13,6 +13,7 @@
 #include "Scene.h"
 #include "DirectLight.h"
 #include "PointLight.h"
+#include "FaceLight.h"
 #include <windows.h>
 #include <vector>
 #include <string>
@@ -21,8 +22,8 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#define WINDOW_WIDTH 600
-#define WINDOW_HEIGHT 600
+#define WINDOW_WIDTH 512
+#define WINDOW_HEIGHT 512
 
 using namespace std;
 
@@ -474,7 +475,8 @@ void renderModernGL(GLuint& programID, glm::mat4& mvp, GLuint& MatrixID)
 void renderLight(GLuint& programID, glm::mat4& mvp, GLuint& MatrixID)
 {
 	DirectLight directLight = DirectLight(Color::white(), glm::vec3(0, -1.5, -1), true);
-	PointLight pointLight = PointLight(glm::vec3(5, 30, 10), Color::white().multiply(0.8), true);
+	PointLight pointLight = PointLight(glm::vec3(5, 39.9, 10), Color::white().multiply(0.8), true);
+	//FaceLight faceLight = FaceLight(glm::vec3(5, 39.9, 0), glm::vec3(5, 0, 0), glm::vec3(0, 0, 5), Color::white(), true);
 
 	//Sphere* sphere1 = new Sphere(glm::vec3(0, 10, -10), 10);
 	//Sphere* sphere2 = new Sphere(glm::vec3(15, 5, -10), 5);
@@ -531,18 +533,153 @@ void renderLight(GLuint& programID, glm::mat4& mvp, GLuint& MatrixID)
 			if (info.isHit)
 			{
 				//Color color = directLight.intersectLight(scene, info);
-				//Color color = pointLight.intersectLight(scene, info);
-				Color color;
+				Color color = pointLight.intersectLight(scene, info);
+				// point light
 				if (pointLight.isIntersected(scene, info))
 				{
-					//color = Color::black().multiply(0.5f);
-					color = Color::black().add(Color(0.1, 0.1, 0.1)).modulate(rayTracer(&scene, ray, maxReflect));
+					color = Color::black().add(Color(0.1, 0.1, 0.1)).modulate(rayTracer(&scene, ray, maxReflect)); // point light
 					//cout << color.r << endl;
 				}
 				else
 				{
 					color = rayTracer(&scene, ray, maxReflect);
 				}
+				colors.push_back(glm::vec3(color.r, color.g, color.b));
+				image[y][x] = cv::Vec3b(color.b * 255, color.g * 255, color.r * 255);
+			}
+			else
+			{
+				colors.push_back(glm::vec3(0, 0, 0));
+				image[y][x] = cv::Vec3b(0, 0, 0);
+			}
+		}
+	}
+
+	//********************
+	GLuint vertexBuffer;
+	glGenBuffers(1, &vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+
+	GLuint colorBuffers;
+	glGenBuffers(1, &colorBuffers);
+	glBindBuffer(GL_ARRAY_BUFFER, colorBuffers);
+	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), &colors[0], GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
+
+	GLuint elementBuffer;
+	glGenBuffers(1, &elementBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	glUseProgram(programID);
+	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
+
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, colorBuffers);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+	glDrawElements(GL_POINTS, WINDOW_HEIGHT * WINDOW_WIDTH, GL_UNSIGNED_INT, (void*)0);
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+
+	// Cleanup VBO
+	glDeleteBuffers(1, &vertexBuffer);
+	glDeleteVertexArrays(1, &VertexArrayID);
+	glDeleteProgram(programID);
+
+	glFlush();
+	glfwSwapBuffers(window);
+}
+
+void renderSoftShadow(GLuint& programID, glm::mat4& mvp, GLuint& MatrixID)
+{
+	//DirectLight directLight = DirectLight(Color::white(), glm::vec3(0, -1.5, -1), true);
+	//PointLight pointLight = PointLight(glm::vec3(5, 39.9, 10), Color::white().multiply(0.8), true);
+	FaceLight faceLight = FaceLight(glm::vec3(5, 39.9, 5), glm::vec3(10, 0, 0), glm::vec3(0, 0, 10), Color::white(), true);
+
+	Sphere* sphere1 = new Sphere(glm::vec3(0, 10, -10), 10);
+	Sphere* sphere2 = new Sphere(glm::vec3(15, 5, -10), 5);
+	//Sphere* sphere1 = new Sphere(glm::vec3(-2, 10, -8), 10);
+	//Sphere* sphere2 = new Sphere(glm::vec3(10, 4, -2), 4);
+	Plane* groundPlane = new Plane(glm::vec3(0, 1, 0), glm::vec3(0, 0, 0));
+	Plane* backPlane = new Plane(glm::vec3(0, 0, 1), glm::vec3(0, 0, -10));
+	Plane* topPlane = new Plane(glm::vec3(0, -1, 0), glm::vec3(0, 40, 0));
+	Plane* leftPlane = new Plane(glm::vec3(1, 0, 0), glm::vec3(-20, 0, 0));
+	Plane* rightPlane = new Plane(glm::vec3(-1, 0, 0), glm::vec3(20, 0, 0));
+	//groundPlane->attr = new ChessMat(0.1f, 0.5f);
+	groundPlane->attr = new PhongMat(Color::white(), Color::white(), 16.0f, true, faceLight.getPosition(), faceLight.getColor(), faceLight.getDx(), faceLight.getDy());
+	//renderLight
+	/*topPlane->attr = new PhongMat(Color::white(), Color::white(), 16.0f, true, pointLight.getPoint(), pointLight.getColor());
+	backPlane->attr = new PhongMat(Color::white(), Color::white(), 16.0f, true, pointLight.getPoint(), pointLight.getColor());
+	leftPlane->attr = new PhongMat(Color::green(), Color::white(), 16.0f, true, pointLight.getPoint(), pointLight.getColor());
+	rightPlane->attr = new PhongMat(Color::red(), Color::white(), 16.0f, true, pointLight.getPoint(), pointLight.getColor());
+	sphere1->attr = new PhongMat(Color::red(), Color::white(), 32.0f, true, pointLight.getPoint(), pointLight.getColor(), 0.25f);
+	sphere2->attr = new PhongMat(Color::blue(), Color::white(), 8.0f, true, pointLight.getPoint(), pointLight.getColor(), 0.25f);*/
+	//renderSoftShadow
+	topPlane->attr = new PhongMat(Color::white(), Color::white(), 16.0f, true, faceLight.getPosition(), faceLight.getColor(), faceLight.getDx(), faceLight.getDy());
+	backPlane->attr = new PhongMat(Color::white(), Color::white(), 16.0f, true, faceLight.getPosition(), faceLight.getColor(), faceLight.getDx(), faceLight.getDy());
+	leftPlane->attr = new PhongMat(Color::green(), Color::white(), 16.0f, true, faceLight.getPosition(), faceLight.getColor(), faceLight.getDx(), faceLight.getDy());
+	rightPlane->attr = new PhongMat(Color::red(), Color::white(), 16.0f, true, faceLight.getPosition(), faceLight.getColor(), faceLight.getDx(), faceLight.getDy());
+	sphere1->attr = new PhongMat(Color::red(), Color::white(), 32.0f, true, faceLight.getPosition(), faceLight.getColor(), faceLight.getDx(), faceLight.getDy(), 0.25f);
+	sphere2->attr = new PhongMat(Color::blue(), Color::white(), 8.0f, true, faceLight.getPosition(), faceLight.getColor(), faceLight.getDx(), faceLight.getDy(), 0.25f);
+	Scene scene;
+	scene.push(sphere1);
+	scene.push(sphere2);
+	scene.push(groundPlane);
+	scene.push(topPlane);
+	scene.push(backPlane);
+	scene.push(leftPlane);
+	scene.push(rightPlane);
+	Camera camera(glm::vec3(0, 20, 10), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0), 60.0f);
+
+	GLuint VertexArrayID;
+	glGenVertexArrays(1, &VertexArrayID);
+	glBindVertexArray(VertexArrayID);
+
+	//Plan A: use vector
+	vector<glm::vec3> vertices;
+	vector<glm::vec3> colors;
+	GLuint indices[WINDOW_WIDTH * WINDOW_HEIGHT];
+	//*******************
+	long maxDepth = 18;
+	long maxReflect = 5;
+	double dx = 1.0f / WINDOW_WIDTH;
+	double dy = 1.0f / WINDOW_HEIGHT;
+	double dd = 255.0f / maxDepth;
+	image.clear();
+	image.resize(WINDOW_HEIGHT, std::vector<cv::Vec3b>(WINDOW_WIDTH));
+	for (long y = 0; y < WINDOW_HEIGHT; y++)
+	{
+		cout << y << endl;
+		double sy = 1 - dy * y;
+		for (long x = 0; x < WINDOW_WIDTH; x++)
+		{
+			double sx = dx * x;
+			Ray ray = Ray(camera.getRay(sx, sy));
+			CollideInfo info = scene.collideScene(ray);
+			vertices.push_back(glm::vec3(sx, sy, 0));
+			indices[y * WINDOW_HEIGHT + x] = y * WINDOW_HEIGHT + x;
+			if (info.isHit)
+			{
+				Color color = faceLight.intersectLight(scene, info);
+				//Color color;
+				if (faceLight.isIntersected(scene, info))
+				{
+					color = color.modulate(rayTracer(&scene, ray, maxReflect));
+				}
+				else
+				{
+					color = rayTracer(&scene, ray, maxReflect);
+				}
+				color.saturate();
 				colors.push_back(glm::vec3(color.r, color.g, color.b));
 				image[y][x] = cv::Vec3b(color.b * 255, color.g * 255, color.r * 255);
 			}
@@ -623,7 +760,7 @@ void _update_fps_counter(GLFWwindow* window) {
 		previous_seconds = current_seconds;
 		double fps = (double)frame_count / elapsed_seconds;
 		char tmp[128];
-		sprintf(tmp, "Ray Tracer Demo @ FPS: %.2f", fps);
+		sprintf(tmp, "Ray Tracer Demo @ FPS: %.5f", fps);
 		glfwSetWindowTitle(window, tmp);
 		frame_count = 0;
 	}
@@ -692,13 +829,14 @@ int main()
 		//renderAPlane();
 		//renderAScene();
 		//renderASceneRecursive();
-		//renderModernGL(programID, mvp, MatrixID);
-		renderLight(programID, mvp, MatrixID);
+		renderModernGL(programID, mvp, MatrixID);
+		//renderLight(programID, mvp, MatrixID);
+		//renderSoftShadow(programID, mvp, MatrixID);
 		glfwPollEvents();
+		//saveimage("000.bmp");
 		//system("pause");
 	}while( glfwWindowShouldClose(window) == 0 );
 
-	//saveimage("16.bmp");
 	//system("pause");
 	glfwTerminate();
     return 0;

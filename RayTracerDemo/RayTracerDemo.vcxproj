@@ -157,6 +157,7 @@
     <ClInclude Include="Attribute.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DirectLight.h" />
+    <ClInclude Include="FaceLight.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
@@ -168,6 +169,7 @@
     <ClCompile Include="Attribute.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DirectLight.cpp" />
+    <ClCompile Include="FaceLight.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="RayTracerDemo.cpp" />
     <ClCompile Include="Scene.cpp" />
